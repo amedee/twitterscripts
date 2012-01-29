@@ -12,3 +12,6 @@ target/
 
 # Ignore OAuth settings file
 twitter4j.properties
+
+# Ignore logfiles
+log/
