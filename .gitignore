@@ -9,3 +9,6 @@ bin/
 
 # Ignore Maven files
 target/
+
+# Ignore OAuth settings file
+twitter4j.properties
