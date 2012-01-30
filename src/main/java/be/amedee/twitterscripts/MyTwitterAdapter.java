@@ -1,7 +1,9 @@
 package be.amedee.twitterscripts;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -13,30 +15,61 @@ import twitter4j.TwitterMethod;
 
 final class MyTwitterAdapter extends TwitterAdapter {
 	
+	private List<String> wordlist;
+
+	public MyTwitterAdapter() {
+		wordlist = initWordList();
+	}
+	
 	@Override
 	public void onException(TwitterException te, TwitterMethod method) {
+		// Can't do anything useful here, so release the lock.
 		CleanTimeline.LOCK.notify();
-//		if (method == UPDATE_STATUS) {
-//			te.printStackTrace();
-//			synchronized (RemoveWorkhoursTweets.LOCK) {
-//				RemoveWorkhoursTweets.LOCK.notify();
-//			}
-//		} else {
-//			synchronized (RemoveWorkhoursTweets.LOCK) {
-//				RemoveWorkhoursTweets.LOCK.notify();
-//			}
-//			throw new AssertionError("Should not happen");
-//		}
 	}
 
 	@Override
 	public void gotUserTimeline(ResponseList<Status> statuses) {
 		for (Status status : statuses) {
 			destroyWorkhourTweets(status);
+			destroyForbiddenWordsTweets(status, wordlist);
 		}
 		synchronized (CleanTimeline.LOCK) {
 			CleanTimeline.LOCK.notify();
 		}
+	}
+
+	private List<String> initWordList() {
+		List<String> words = new ArrayList<String>();
+		words.add("Arcelor");
+		words.add("Zaventem");
+		words.add("Zelzate");
+		words.add("@slecluyse");
+		words.add("@ldeneef");
+		words.add("Anon");
+		words.add("werkgever");
+		words.add("vakbond");
+		words.add("#30J");
+		words.add("staken");
+		words.add("staak");
+		words.add("staking");
+		words.add("ABVV");
+		words.add("firma");
+		words.add("Econocom");
+		words.add("CSC");
+		words.add("Cheops");
+		words.add("DYMO");
+		words.add("@");
+		return words;
+	}
+
+	private void destroyForbiddenWordsTweets(Status status, List<String> wordlist) {
+		for (String word : wordlist) {
+			int index = status.getText().toLowerCase().indexOf(word.toLowerCase());
+			if (index>-1) {
+				destroyStatus(status);
+			}
+		}
+		
 	}
 
 	/**
