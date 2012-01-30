@@ -1,6 +1,5 @@
 package be.amedee.twitterscripts;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -15,11 +14,7 @@ import twitter4j.TwitterMethod;
 
 final class MyTwitterAdapter extends TwitterAdapter {
 	
-	private List<String> wordlist;
-
-	public MyTwitterAdapter() {
-		wordlist = initWordList();
-	}
+	private WordList wordlist = new WordList();
 	
 	@Override
 	public void onException(TwitterException te, TwitterMethod method) {
@@ -31,35 +26,11 @@ final class MyTwitterAdapter extends TwitterAdapter {
 	public void gotUserTimeline(ResponseList<Status> statuses) {
 		for (Status status : statuses) {
 			destroyWorkhourTweets(status);
-			destroyForbiddenWordsTweets(status, wordlist);
+			destroyForbiddenWordsTweets(status, wordlist.getWordlist());
 		}
 		synchronized (CleanTimeline.LOCK) {
 			CleanTimeline.LOCK.notify();
 		}
-	}
-
-	private List<String> initWordList() {
-		List<String> words = new ArrayList<String>();
-		words.add("Arcelor");
-		words.add("Zaventem");
-		words.add("Zelzate");
-		words.add("@slecluyse");
-		words.add("@ldeneef");
-		words.add("Anon");
-		words.add("werkgever");
-		words.add("vakbond");
-		words.add("#30J");
-		words.add("staken");
-		words.add("staak");
-		words.add("staking");
-		words.add("ABVV");
-		words.add("firma");
-		words.add("Econocom");
-		words.add("CSC");
-		words.add("Cheops");
-		words.add("DYMO");
-		words.add("@");
-		return words;
 	}
 
 	private void destroyForbiddenWordsTweets(Status status, List<String> wordlist) {

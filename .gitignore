@@ -15,3 +15,6 @@ twitter4j.properties
 
 # Ignore logfiles
 log/
+
+# ignore project properties files
+CleanTimeline.properties
